@@ -16,6 +16,7 @@
 
 package glwallpaper;
 
+import java.io.Writer;
 import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -32,8 +33,6 @@ import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import com.gplio.fibrewallpaper.BuildConfig;
-
 // Original code provided by Robert Green
 // http://www.rbgrn.net/content/354-glsurfaceview-adapted-3d-live-wallpapers
 public class GLWallpaperService extends WallpaperService {
@@ -49,11 +48,12 @@ public class GLWallpaperService extends WallpaperService {
         public final static int RENDERMODE_CONTINUOUSLY = 1;
 
         private GLThread mGLThread;
-        private GLSurfaceView.EGLConfigChooser mEGLConfigChooser;
-        private GLSurfaceView.EGLContextFactory mEGLContextFactory;
-        private GLSurfaceView.EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
-        private GLSurfaceView.GLWrapper mGLWrapper;
+        private EGLConfigChooser mEGLConfigChooser;
+        private EGLContextFactory mEGLContextFactory;
+        private EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
+        private GLWrapper mGLWrapper;
         private int mDebugFlags;
+        private int mEGLContextClientVersion;
 
         public GLEngine() {
             super();
@@ -72,33 +72,33 @@ public class GLWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            if(BuildConfig.DEBUG) Log.d(TAG, "GLEngine.onCreate()");
+            // Log.d(TAG, "GLEngine.onCreate()");
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
-            if(BuildConfig.DEBUG) Log.d(TAG, "GLEngine.onDestroy()");
+            // Log.d(TAG, "GLEngine.onDestroy()");
             mGLThread.requestExitAndWait();
         }
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "onSurfaceChanged()");
+            // Log.d(TAG, "onSurfaceChanged()");
             mGLThread.onWindowResize(width, height);
             super.onSurfaceChanged(holder, format, width, height);
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "onSurfaceCreated()");
+            Log.d(TAG, "onSurfaceCreated()");
             mGLThread.surfaceCreated(holder);
             super.onSurfaceCreated(holder);
         }
 
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "onSurfaceDestroyed()");
+            Log.d(TAG, "onSurfaceDestroyed()");
             mGLThread.surfaceDestroyed();
             super.onSurfaceDestroyed(holder);
         }
@@ -106,7 +106,7 @@ public class GLWallpaperService extends WallpaperService {
         /**
          * An EGL helper class.
          */
-        public void setGLWrapper(GLSurfaceView.GLWrapper glWrapper) {
+        public void setGLWrapper(GLWrapper glWrapper) {
             mGLWrapper = glWrapper;
         }
 
@@ -118,10 +118,15 @@ public class GLWallpaperService extends WallpaperService {
             return mDebugFlags;
         }
 
+        public void setEGLContextClientVersion(int version) {
+            checkRenderThreadState();
+            mEGLContextClientVersion = version;
+        }
+
         public void setRenderer(GLSurfaceView.Renderer renderer) {
             checkRenderThreadState();
             if (mEGLConfigChooser == null) {
-                mEGLConfigChooser = new BaseConfigChooser.SimpleEGLConfigChooser(true);
+                mEGLConfigChooser = new BaseConfigChooser.SimpleEGLConfigChooser(true, mEGLContextClientVersion);
             }
             if (mEGLContextFactory == null) {
                 mEGLContextFactory = new DefaultContextFactory();
@@ -129,33 +134,33 @@ public class GLWallpaperService extends WallpaperService {
             if (mEGLWindowSurfaceFactory == null) {
                 mEGLWindowSurfaceFactory = new DefaultWindowSurfaceFactory();
             }
-            mGLThread = new GLThread(renderer, mEGLConfigChooser, mEGLContextFactory, mEGLWindowSurfaceFactory, mGLWrapper);
+            mGLThread = new GLThread(renderer, mEGLConfigChooser, mEGLContextFactory, mEGLWindowSurfaceFactory, mGLWrapper, mEGLContextClientVersion);
             mGLThread.start();
         }
 
-        public void setEGLContextFactory(GLSurfaceView.EGLContextFactory factory) {
+        public void setEGLContextFactory(EGLContextFactory factory) {
             checkRenderThreadState();
             mEGLContextFactory = factory;
         }
 
-        public void setEGLWindowSurfaceFactory(GLSurfaceView.EGLWindowSurfaceFactory factory) {
+        public void setEGLWindowSurfaceFactory(EGLWindowSurfaceFactory factory) {
             checkRenderThreadState();
             mEGLWindowSurfaceFactory = factory;
         }
 
-        public void setEGLConfigChooser(GLSurfaceView.EGLConfigChooser configChooser) {
+        public void setEGLConfigChooser(EGLConfigChooser configChooser) {
             checkRenderThreadState();
             mEGLConfigChooser = configChooser;
         }
 
         public void setEGLConfigChooser(boolean needDepth) {
-            setEGLConfigChooser(new BaseConfigChooser.SimpleEGLConfigChooser(needDepth));
+            setEGLConfigChooser(new BaseConfigChooser.SimpleEGLConfigChooser(needDepth, mEGLContextClientVersion));
         }
 
         public void setEGLConfigChooser(int redSize, int greenSize, int blueSize, int alphaSize, int depthSize,
                                         int stencilSize) {
             setEGLConfigChooser(new BaseConfigChooser.ComponentSizeChooser(redSize, greenSize, blueSize, alphaSize, depthSize,
-                    stencilSize));
+                    stencilSize, mEGLContextClientVersion));
         }
 
         public void setRenderMode(int renderMode) {
@@ -188,32 +193,60 @@ public class GLWallpaperService extends WallpaperService {
             }
         }
     }
+}
 
-    /**
-     * Empty wrapper for {@link GLSurfaceView.Renderer}.
-     *
-     * @deprecated Use {@link GLSurfaceView.Renderer} instead.
-     */
-    @Deprecated
-    public interface Renderer extends GLSurfaceView.Renderer {
+class LogWriter extends Writer {
+    private StringBuilder mBuilder = new StringBuilder();
+
+    @Override
+    public void close() {
+        flushBuilder();
+    }
+
+    @Override
+    public void flush() {
+        flushBuilder();
+    }
+
+    @Override
+    public void write(char[] buf, int offset, int count) {
+        for (int i = 0; i < count; i++) {
+            char c = buf[offset + i];
+            if (c == '\n') {
+                flushBuilder();
+            } else {
+                mBuilder.append(c);
+            }
+        }
+    }
+
+    private void flushBuilder() {
+        if (mBuilder.length() > 0) {
+            Log.v("GLSurfaceView", mBuilder.toString());
+            mBuilder.delete(0, mBuilder.length());
+        }
     }
 }
 
 // ----------------------------------------------------------------------
 
-/**
- * Empty wrapper for {@link GLSurfaceView.EGLContextFactory}.
- *
- * @deprecated Use {@link GLSurfaceView.EGLContextFactory} instead.
- */
-@Deprecated
-interface EGLContextFactory extends GLSurfaceView.EGLContextFactory {
+
+interface EGLContextFactory {
+    EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig, int eglContextClientVersion);
+
+    void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context);
 }
 
-class DefaultContextFactory implements GLSurfaceView.EGLContextFactory {
+class DefaultContextFactory implements EGLContextFactory {
 
-    public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig config) {
-        return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, null);
+    private int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+
+    public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig config, int eglContextClientVersion) {
+        int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, eglContextClientVersion,
+                EGL10.EGL_NONE };
+
+        return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT,
+                eglContextClientVersion != 0 ? attrib_list : null);
     }
 
     public void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context) {
@@ -230,7 +263,7 @@ class DefaultContextFactory implements GLSurfaceView.EGLContextFactory {
 interface EGLWindowSurfaceFactory extends GLSurfaceView.EGLWindowSurfaceFactory {
 }
 
-class DefaultWindowSurfaceFactory implements GLSurfaceView.EGLWindowSurfaceFactory {
+class DefaultWindowSurfaceFactory implements EGLWindowSurfaceFactory {
 
     public EGLSurface createWindowSurface(EGL10 egl, EGLDisplay
             display, EGLConfig config, Object nativeWindow) {
@@ -240,12 +273,12 @@ class DefaultWindowSurfaceFactory implements GLSurfaceView.EGLWindowSurfaceFacto
             try {
                 eglSurface = egl.eglCreateWindowSurface(display,
                         config, nativeWindow, null);
-            } catch (Throwable ignored) {
+            } catch (Throwable t) {
             } finally {
                 if (eglSurface == null) {
                     try {
                         Thread.sleep(10);
-                    } catch (InterruptedException ignored) {
+                    } catch (InterruptedException t) {
                     }
                 }
             }
@@ -268,24 +301,27 @@ interface GLWrapper extends GLSurfaceView.GLWrapper {
 }
 
 class EglHelper {
-    private static String TAG = "EglHelper"; 
+
     private EGL10 mEgl;
     private EGLDisplay mEglDisplay;
     private EGLSurface mEglSurface;
     private EGLContext mEglContext;
     EGLConfig mEglConfig;
+    private int mEGLContextClientVersion;
 
-    private GLSurfaceView.EGLConfigChooser mEGLConfigChooser;
-    private GLSurfaceView.EGLContextFactory mEGLContextFactory;
-    private GLSurfaceView.EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
-    private GLSurfaceView.GLWrapper mGLWrapper;
+    private EGLConfigChooser mEGLConfigChooser;
+    private EGLContextFactory mEGLContextFactory;
+    private EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
+    private GLWrapper mGLWrapper;
 
-    public EglHelper(GLSurfaceView.EGLConfigChooser chooser, GLSurfaceView.EGLContextFactory contextFactory,
-                     GLSurfaceView.EGLWindowSurfaceFactory surfaceFactory, GLSurfaceView.GLWrapper wrapper) {
+    public EglHelper(EGLConfigChooser chooser, EGLContextFactory contextFactory,
+                     EGLWindowSurfaceFactory surfaceFactory, GLWrapper wrapper,
+                     int eglContextClientVersion) {
         this.mEGLConfigChooser = chooser;
         this.mEGLContextFactory = contextFactory;
         this.mEGLWindowSurfaceFactory = surfaceFactory;
         this.mGLWrapper = wrapper;
+        this.mEGLContextClientVersion = eglContextClientVersion;
     }
 
     /**
@@ -293,29 +329,29 @@ class EglHelper {
      *
      */
     public void start() {
-        if(BuildConfig.DEBUG) Log.d("EglHelper", "start()");
+        // Log.d("EglHelper" + instanceId, "start()");
         if (mEgl == null) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "getting new EGL");
+            // Log.d("EglHelper" + instanceId, "getting new EGL");
 			/*
 			 * Get an EGL instance
 			 */
             mEgl = (EGL10) EGLContext.getEGL();
         } else {
-            if(BuildConfig.DEBUG) Log.d(TAG, "reusing EGL");
+            // Log.d("EglHelper" + instanceId, "reusing EGL");
         }
 
         if (mEglDisplay == null) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "getting new display");
+            // Log.d("EglHelper" + instanceId, "getting new display");
 			/*
 			 * Get to the default display.
 			 */
             mEglDisplay = mEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
         } else {
-            if(BuildConfig.DEBUG) Log.d(TAG, "reusing display");
+            // Log.d("EglHelper" + instanceId, "reusing display");
         }
 
         if (mEglConfig == null) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "getting new config");
+            // Log.d("EglHelper" + instanceId, "getting new config");
 			/*
 			 * We can now initialize EGL for that display
 			 */
@@ -323,20 +359,21 @@ class EglHelper {
             mEgl.eglInitialize(mEglDisplay, version);
             mEglConfig = mEGLConfigChooser.chooseConfig(mEgl, mEglDisplay);
         } else {
-            if(BuildConfig.DEBUG) Log.d(TAG, "reusing config");
+            // Log.d("EglHelper" + instanceId, "reusing config");
         }
 
         if (mEglContext == null) {
-            if(BuildConfig.DEBUG) Log.d(TAG, "creating new context");
+            // Log.d("EglHelper" + instanceId, "creating new context");
 			/*
 			 * Create an OpenGL ES context. This must be done only once, an OpenGL context is a somewhat heavy object.
 			 */
-            mEglContext = mEGLContextFactory.createContext(mEgl, mEglDisplay, mEglConfig);
+            mEglContext = mEGLContextFactory.createContext(mEgl, mEglDisplay,
+                    mEglConfig, mEGLContextClientVersion);
             if (mEglContext == null || mEglContext == EGL10.EGL_NO_CONTEXT) {
                 throw new RuntimeException("createContext failed");
             }
         } else {
-            if(BuildConfig.DEBUG) Log.d(TAG, "reusing context");
+            // Log.d("EglHelper" + instanceId, "reusing context");
         }
 
         mEglSurface = null;
@@ -432,10 +469,10 @@ class GLThread extends Thread {
     private final GLThreadManager sGLThreadManager = new GLThreadManager();
     private GLThread mEglOwner;
 
-    private GLSurfaceView.EGLConfigChooser mEGLConfigChooser;
-    private GLSurfaceView.EGLContextFactory mEGLContextFactory;
-    private GLSurfaceView.EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
-    private GLSurfaceView.GLWrapper mGLWrapper;
+    private EGLConfigChooser mEGLConfigChooser;
+    private EGLContextFactory mEGLContextFactory;
+    private EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
+    private GLWrapper mGLWrapper;
 
     public SurfaceHolder mHolder;
     private boolean mSizeChanged = true;
@@ -457,9 +494,11 @@ class GLThread extends Thread {
     private GLSurfaceView.Renderer mRenderer;
     private ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
     private EglHelper mEglHelper;
+    private int mEGLContextClientVersion;
 
-    GLThread(GLSurfaceView.Renderer renderer, GLSurfaceView.EGLConfigChooser chooser, GLSurfaceView.EGLContextFactory contextFactory,
-             GLSurfaceView.EGLWindowSurfaceFactory surfaceFactory, GLSurfaceView.GLWrapper wrapper) {
+    GLThread(GLSurfaceView.Renderer renderer, EGLConfigChooser chooser, EGLContextFactory contextFactory,
+             EGLWindowSurfaceFactory surfaceFactory, GLWrapper wrapper,
+             int eglContextClientVersion) {
         super();
         mDone = false;
         mWidth = 0;
@@ -471,6 +510,7 @@ class GLThread extends Thread {
         this.mEGLContextFactory = contextFactory;
         this.mEGLWindowSurfaceFactory = surfaceFactory;
         this.mGLWrapper = wrapper;
+        this.mEGLContextClientVersion = eglContextClientVersion;
     }
 
     @Override
@@ -501,7 +541,7 @@ class GLThread extends Thread {
     }
 
     private void guardedRun() throws InterruptedException {
-        mEglHelper = new EglHelper(mEGLConfigChooser, mEGLContextFactory, mEGLWindowSurfaceFactory, mGLWrapper);
+        mEglHelper = new EglHelper(mEGLConfigChooser, mEGLContextFactory, mEGLWindowSurfaceFactory, mGLWrapper, mEGLContextClientVersion);
         try {
             GL10 gl = null;
             boolean tellRendererSurfaceCreated = true;
@@ -802,12 +842,32 @@ class GLThread extends Thread {
  * @deprecated Use {@link GLSurfaceView.EGLConfigChooser} instead.
  */
 @Deprecated
-interface EGLConfigChooser extends GLSurfaceView.EGLConfigChooser {
+interface EGLConfigChooser extends android.opengl.GLSurfaceView.EGLConfigChooser {
 }
 
-abstract class BaseConfigChooser implements GLSurfaceView.EGLConfigChooser {
-    public BaseConfigChooser(int[] configSpec) {
-        mConfigSpec = configSpec;
+abstract class BaseConfigChooser implements EGLConfigChooser {
+
+    protected int mEGLContextClientVersion;
+
+    public BaseConfigChooser(int[] configSpec, int eglContextClientVersion) {
+        this.mEGLContextClientVersion = eglContextClientVersion;
+        mConfigSpec = filterConfigSpec(configSpec);
+    }
+
+    private int[] filterConfigSpec(int[] configSpec) {
+        if (mEGLContextClientVersion != 2) {
+            return configSpec;
+        }
+	    /* We know none of the subclasses define EGL_RENDERABLE_TYPE.
+	     * And we know the configSpec is well formed.
+	     */
+        int len = configSpec.length;
+        int[] newConfigSpec = new int[len + 2];
+        System.arraycopy(configSpec, 0, newConfigSpec, 0, len-1);
+        newConfigSpec[len-1] = EGL10.EGL_RENDERABLE_TYPE;
+        newConfigSpec[len] = 4; /* EGL_OPENGL_ES2_BIT */
+        newConfigSpec[len+1] = EGL10.EGL_NONE;
+        return newConfigSpec;
     }
 
     public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
@@ -834,10 +894,10 @@ abstract class BaseConfigChooser implements GLSurfaceView.EGLConfigChooser {
     protected int[] mConfigSpec;
     public static class ComponentSizeChooser extends BaseConfigChooser {
         public ComponentSizeChooser(int redSize, int greenSize, int blueSize, int alphaSize, int depthSize,
-                                    int stencilSize) {
+                                    int stencilSize, int eglContextClientVersion) {
             super(new int[] { EGL10.EGL_RED_SIZE, redSize, EGL10.EGL_GREEN_SIZE, greenSize, EGL10.EGL_BLUE_SIZE,
                     blueSize, EGL10.EGL_ALPHA_SIZE, alphaSize, EGL10.EGL_DEPTH_SIZE, depthSize, EGL10.EGL_STENCIL_SIZE,
-                    stencilSize, EGL10.EGL_NONE });
+                    stencilSize, EGL10.EGL_NONE }, eglContextClientVersion);
             mValue = new int[1];
             mRedSize = redSize;
             mGreenSize = greenSize;
@@ -893,8 +953,8 @@ abstract class BaseConfigChooser implements GLSurfaceView.EGLConfigChooser {
      *
      */
     public static class SimpleEGLConfigChooser extends ComponentSizeChooser {
-        public SimpleEGLConfigChooser(boolean withDepthBuffer) {
-            super(4, 4, 4, 0, withDepthBuffer ? 16 : 0, 0);
+        public SimpleEGLConfigChooser(boolean withDepthBuffer, int eglContextClientVersion) {
+            super(4, 4, 4, 0, withDepthBuffer ? 16 : 0, 0, eglContextClientVersion);
             // Adjust target values. This way we'll accept a 4444 or
             // 555 buffer if there's no 565 buffer available.
             mRedSize = 5;

@@ -3,6 +3,7 @@ package com.gplio.fibrewallpaper.main;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 
 import com.gplio.andlib.graphics.GShader;
 import com.gplio.andlib.graphics.GShape;
@@ -61,7 +62,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
                         "float d = distLine(uv, vec2(0.0), vec2(cos(time), sin(time)));" +
                         "float r = N22(uv).y;" +
                         "float m = smoothstep(0.05 , 0.035, d);"+
-                        "vec3 col = vec3(m);"+
+                        "vec3 col = vec3(m) * vec3(0.7,0.1,0.1);"+
                         "gl_FragColor = vec4(col,1.0);" +
                         "}";
 
@@ -93,6 +94,8 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         height = h;
         shapes = new ArrayList<>();
         shapes.add(new QuadShape(2.0f));
+
+        Log.d("MainRenderer", "width::" + width + " height:: " + height);
     }
 
     @Override

@@ -14,6 +14,7 @@ public class FibreWallpaperService extends GLWallpaperService {
 
     private class MainEngine extends GLEngine {
         MainEngine() {
+            setEGLContextClientVersion(2);
             setRenderer(new MainRenderer(getApplicationContext()));
         }
     }

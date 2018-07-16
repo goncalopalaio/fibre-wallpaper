@@ -95,7 +95,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         shapes = new ArrayList<>();
         shapes.add(new QuadShape(2.0f));
 
-        Log.d("MainRenderer", "width::" + width + " height:: " + height);
+        Log.d("MainRenderer", "width::" + width + " height::" + height);
     }
 
     @Override

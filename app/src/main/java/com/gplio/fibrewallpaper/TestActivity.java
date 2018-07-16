@@ -18,7 +18,7 @@ public class TestActivity extends AppCompatActivity {
         surface.setPreserveEGLContextOnPause(true);
         surface.setEGLContextClientVersion(2);
         surface.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        surface.setRenderer(new MainRenderer());
+        surface.setRenderer(new MainRenderer(getApplicationContext()));
         surface.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
     }

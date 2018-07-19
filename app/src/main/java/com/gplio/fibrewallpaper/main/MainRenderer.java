@@ -6,6 +6,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Environment;
 import android.util.Log;
 
+import com.gplio.andlib.files.TextFiles;
 import com.gplio.andlib.graphics.GShader;
 import com.gplio.andlib.graphics.GShape;
 import com.gplio.andlib.graphics.GenericShader;
@@ -28,52 +29,8 @@ public class MainRenderer implements GLSurfaceView.Renderer {
     private int width;
 
     private static class CustomShader extends LiveShader {
-        private static String distLine = "float distLine(vec2 p, vec2 a, vec2 b) {" +
-                "vec2 pa = p-a;" +
-                "vec2 ba = b-a;" +
-                "float t = clamp(dot(pa,ba)/dot(ba,ba), 0.0, 1.0);" +
-                "return length(pa-ba*t);" +
-                "}";
-        private static String N21 = "" +
-                "float N21(vec2 p) {" +
-                "p = fract(p*vec2(233.994563, 851.73));" +
-                "p += dot(p, p+4.9145);" +
-                "return fract(p.x * p.y);" +
-                "}";
-        private static String N22 = "" +
-                "vec2 N22(vec2 p ) {" +
-                "float n = N21(p);" +
-                "return vec2(n, N21(p+n));" +
-                "}";
-        private static String vertex =
-                "attribute vec4 position;" +
-                        "attribute vec2 uv;" +
-                        "void main() {" +
-                        "gl_Position = position;" +
-                        "}";
-
-        private static String fragment =
-                "precision mediump float;" +
-                        distLine +
-                        N21 +
-                        N22 +
-                        "uniform float width;" +
-                        "uniform float height;" +
-                        "uniform float time;" +
-                        "void main() {" +
-                        "vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;" +
-                        "float d = distLine(uv, vec2(0.0), vec2(cos(time), sin(time)));" +
-                        "float r = N22(uv).y;" +
-                        "float m = smoothstep(0.1 , 0.05, d);" +
-                        "uv *= 5.0;" +
-                        "vec2 gv = fract(uv) - 0.5;" +
-                        "vec3 col = vec3(0);" +
-                        "if (gv.x > 0.48 || gv.y > 0.48) col = vec3(1.0,0.0,0.0);" +
-                        "gl_FragColor = vec4(col,1.0);" +
-                        "}";
-
-        public CustomShader() {
-            super(vertex, fragment, Environment.getExternalStorageDirectory() + "/fibre/", "current.vert", "current.frag");
+        public CustomShader(String defaultVertexShaderCode, String defaultFragmentShaderCode) {
+            super(defaultVertexShaderCode, defaultFragmentShaderCode, Environment.getExternalStorageDirectory() + "/fibre/", "current.vert", "current.frag");
         }
     }
 
@@ -84,7 +41,11 @@ public class MainRenderer implements GLSurfaceView.Renderer {
 
     public MainRenderer(Context context) {
         this.context = context;
-        genericShader = new CustomShader();
+
+        // just leave it like this for now
+        String previousVertexShader = TextFiles.readStringFromAssets(context, "shaders/current.vert", "");
+        String previousFragmentShader = TextFiles.readStringFromAssets(context, "shaders/current.frag", "");
+        genericShader = new CustomShader(previousVertexShader, previousFragmentShader);
     }
 
     @Override

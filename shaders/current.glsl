@@ -41,6 +41,7 @@ float line(vec2 p, vec2 a, vec2 b) {
 
 	float m = smoothstep(0.03, 0.01, d);
 
+	m *= smoothstep(1.2, 0.8, length(a-b)); // do not draw lines if too close
 	return m;
 }
 void main() {

@@ -61,8 +61,11 @@ public class MainRenderer implements GLSurfaceView.Renderer {
                         "vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;"+
                         "float d = distLine(uv, vec2(0.0), vec2(cos(time), sin(time)));" +
                         "float r = N22(uv).y;" +
-                        "float m = smoothstep(0.05 , 0.035, d);"+
-                        "vec3 col = vec3(m) * vec3(0.7,0.1,0.1);"+
+                        "float m = smoothstep(0.1 , 0.05, d);"+
+                        "uv *= 5.0;" +
+                        "vec2 gv = fract(uv) - 0.5;"+
+                        "vec3 col = vec3(0);" +
+                        "if (gv.x > 0.48 || gv.y > 0.48) col = vec3(1.0,0.0,0.0);"+
                         "gl_FragColor = vec4(col,1.0);" +
                         "}";
 

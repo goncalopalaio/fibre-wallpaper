@@ -3,12 +3,15 @@ package com.gplio.fibrewallpaper.main;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.Environment;
 import android.util.Log;
 
 import com.gplio.andlib.graphics.GShader;
 import com.gplio.andlib.graphics.GShape;
 import com.gplio.andlib.graphics.GenericShader;
+import com.gplio.andlib.graphics.LiveShader;
 import com.gplio.andlib.graphics.QuadShape;
+import com.gplio.fibrewallpaper.BuildConfig;
 
 import java.util.ArrayList;
 
@@ -24,12 +27,12 @@ public class MainRenderer implements GLSurfaceView.Renderer {
     private int height;
     private int width;
 
-    private static class CustomShader extends GShader{
+    private static class CustomShader extends LiveShader {
         private static String distLine = "float distLine(vec2 p, vec2 a, vec2 b) {" +
                 "vec2 pa = p-a;" +
                 "vec2 ba = b-a;" +
                 "float t = clamp(dot(pa,ba)/dot(ba,ba), 0.0, 1.0);" +
-                "return length(pa-ba*t);"+
+                "return length(pa-ba*t);" +
                 "}";
         private static String N21 = "" +
                 "float N21(vec2 p) {" +
@@ -58,53 +61,66 @@ public class MainRenderer implements GLSurfaceView.Renderer {
                         "uniform float height;" +
                         "uniform float time;" +
                         "void main() {" +
-                        "vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;"+
+                        "vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;" +
                         "float d = distLine(uv, vec2(0.0), vec2(cos(time), sin(time)));" +
                         "float r = N22(uv).y;" +
-                        "float m = smoothstep(0.1 , 0.05, d);"+
+                        "float m = smoothstep(0.1 , 0.05, d);" +
                         "uv *= 5.0;" +
-                        "vec2 gv = fract(uv) - 0.5;"+
+                        "vec2 gv = fract(uv) - 0.5;" +
                         "vec3 col = vec3(0);" +
-                        "if (gv.x > 0.48 || gv.y > 0.48) col = vec3(1.0,0.0,0.0);"+
+                        "if (gv.x > 0.48 || gv.y > 0.48) col = vec3(1.0,0.0,0.0);" +
                         "gl_FragColor = vec4(col,1.0);" +
                         "}";
 
         public CustomShader() {
-            super(vertex, fragment);
+            super(vertex, fragment, Environment.getExternalStorageDirectory() + "/fibre/", "current.vert", "current.frag");
         }
     }
 
     private final Context context;
-    private GShader genericShader;
+    private LiveShader genericShader;
     private float tick;
     private ArrayList<GShape> shapes;
 
     public MainRenderer(Context context) {
-
         this.context = context;
+        genericShader = new CustomShader();
     }
+
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        genericShader = new CustomShader();
+
         genericShader.init(context);
         tick = 0;
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int w, int h) {
-        GLES20.glClearColor(0.1f, 0.4f , 1.0f, 1.0f);
+        GLES20.glClearColor(0.1f, 0.4f, 1.0f, 1.0f);
         width = w;
         height = h;
         shapes = new ArrayList<>();
         shapes.add(new QuadShape(2.0f));
 
         Log.d("MainRenderer", "width::" + width + " height::" + height);
+
+        genericShader.unsubscribe();
+        genericShader.subscribe(context);
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
+        if (genericShader.isDirty()) {
+            genericShader.recompileShader(context);
+        }
+
         genericShader.draw(shapes, tick, width, height);
         tick += 0.01;
+    }
+
+    public void unsubscribeExternalEvents() {
+        genericShader.unsubscribe();
     }
 }

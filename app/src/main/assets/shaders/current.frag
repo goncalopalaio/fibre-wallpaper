@@ -14,7 +14,7 @@ float distLine(vec2 p, vec2 a, vec2 b) {
 }
 
 float N21(vec2 p) {
-	p = fract(p*vec2(3.99563, 1.73));
+	p = fract(p*vec2(3.995643, 1.73));
 	p += dot(p, p+4.914);
 	return fract(p.x * p.y);
 }      
@@ -39,17 +39,13 @@ float line(vec2 p, vec2 a, vec2 b) {
 }
 void main() {
 	vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;
-	//float d = distLine(uv, vec2(0.0), vec2(cos(time), sin(time)));
-	//float r = N22(uv).y;
+	
 	float m = 0.0;
-	//smoothstep(0.1 , 0.05, d);
-	uv *= 5.0;
+	
+	uv *= 15.0;
 	vec2 gv = fract(uv) - 0.5;
 	vec2 id = floor(uv) - 0.5;
 
-	//vec2 p = getPointInGridCell(id);
-	//float dist = length(gv - p);
-	//m = smoothstep(0.05, 0.01, dist);
 
 	int i = 0;
 	vec2 p[9];
@@ -60,8 +56,13 @@ void main() {
 		} 			
 	}
 
+	float t = time * 10.;
 	for(int i = 0; i < 9; i++) {
 		m += line(gv, p[4], p[i]);
+
+		vec2 j = (p[i] - gv) * 20.;
+		float sparkle = 1. / dot(j, j);
+		m += sparkle * (sin(t+p[i].y * 10.) * .5 + .5);
 	}
 	m += line(gv, p[1], p[3]);
 	m += line(gv, p[1], p[5]);

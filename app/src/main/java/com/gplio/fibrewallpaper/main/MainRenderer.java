@@ -7,12 +7,9 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.gplio.andlib.files.TextFiles;
-import com.gplio.andlib.graphics.GShader;
 import com.gplio.andlib.graphics.GShape;
-import com.gplio.andlib.graphics.GenericShader;
 import com.gplio.andlib.graphics.LiveShader;
 import com.gplio.andlib.graphics.QuadShape;
-import com.gplio.fibrewallpaper.BuildConfig;
 
 import java.util.ArrayList;
 
@@ -34,9 +31,10 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    private long lastTick = System.currentTimeMillis();
     private final Context context;
     private LiveShader genericShader;
-    private float tick;
+    private float time;
     private ArrayList<GShape> shapes;
 
     public MainRenderer(Context context) {
@@ -52,7 +50,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
         genericShader.init(context);
-        tick = 0;
+        time = 0;
     }
 
     @Override
@@ -77,8 +75,18 @@ public class MainRenderer implements GLSurfaceView.Renderer {
             genericShader.recompileShader(context);
         }
 
-        genericShader.draw(shapes, tick, width, height);
-        tick += 0.01;
+        genericShader.draw(shapes, time, width, height);
+        time += 0.03;
+
+        long nextTick = lastTick + 70;
+        long now;
+        while ((now = System.currentTimeMillis()) < nextTick) {
+            try {
+                Thread.sleep(nextTick - now);
+            } catch (InterruptedException ignored) {
+            }
+        }
+        lastTick = now;
     }
 
     public void unsubscribeExternalEvents() {

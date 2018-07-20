@@ -21,7 +21,7 @@ float distLine(vec2 p, vec2 a, vec2 b) {
 }
 
 float N21(vec2 p) {
-	p = fract(p*vec2(3.995643, 1.73));
+	p = fract(p*vec2(3.95643, 1.73));
 	p += dot(p, p+4.914);
 	return fract(p.x * p.y);
 }      
@@ -44,12 +44,11 @@ float line(vec2 p, vec2 a, vec2 b) {
 	m *= smoothstep(1.2, 0.8, length(a-b)); // do not draw lines if too close
 	return m;
 }
-void main() {
-	vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;
-	
-	float m = 0.0;
-	
-	uv *= 15.0;
+
+float layer(vec2 uv) {
+
+	float m = 0.;
+
 	vec2 gv = fract(uv) - 0.5;
 	vec2 id = floor(uv) - 0.5;
 
@@ -76,8 +75,30 @@ void main() {
 	m += line(gv, p[7], p[3]);
 	m += line(gv, p[7], p[5]);
 
-	vec3 col = vec3(m);
-	//col.rg = N22(uv);
+	return m;
+}
+void main() {
+	vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;
+	float t = time * 0.1;
+	float m = 0.;
+	float gradient = uv.y;
+	uv *= 4.5;
+	float s = sin(t);
+	float c = cos(t);
+	mat2 rotation = mat2(c, -s, s, c);
+	uv *= rotation;
+	for (float i = 0.; i<=1.; i+=1./2.) {
+		float depth = fract(i + t);
+		float size = mix(10., 0.5, depth);
+		float fade = smoothstep(0., 0.5, depth) * smoothstep(1.0, 0.8, depth);
+
+		m += layer(uv * size + i * 20.4) * fade;
+	}
+
+	vec3 baseColor = sin(t * 5.0 * vec3(0.34, 0.43, 0.63)) * 0.4 + 0.6;
+	vec3 col = vec3(m) * baseColor;
+	col -= gradient * baseColor;
+	//vec2 gv = fract(uv) - 0.5;
 	//if (gv.x > 0.48 || gv.y > 0.48) col = vec3(1.0,1.0,0.0);
 	
 	gl_FragColor = vec4(col, 1.0);

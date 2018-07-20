@@ -78,7 +78,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         genericShader.draw(shapes, time, width, height);
         time += 0.03;
 
-        long nextTick = lastTick + 70;
+        long nextTick = lastTick + 20;
         long now;
         while ((now = System.currentTimeMillis()) < nextTick) {
             try {

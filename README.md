@@ -16,3 +16,4 @@ The current implementation is a draft. I cannot ensure it will work across devic
 
 The render loop is neither optimized or correct in terms of locking the correct framerate.
 Generally in the release build, the section that live reloads the shader should not be included. That is yet to be implemented.
+Runtime permissions are currently not requested automatically. So to receive file events from the sdcard you will have to grant them through system settings.

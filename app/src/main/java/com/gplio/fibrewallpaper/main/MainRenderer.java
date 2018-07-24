@@ -10,6 +10,8 @@ import com.gplio.andlib.files.TextFiles;
 import com.gplio.andlib.graphics.GShape;
 import com.gplio.andlib.graphics.LiveShader;
 import com.gplio.andlib.graphics.QuadShape;
+import com.gplio.andlib.graphics.TextShader;
+import com.gplio.andlib.graphics.TextShape;
 
 import java.util.ArrayList;
 
@@ -25,6 +27,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
     private int height;
     private int width;
 
+
     private static class CustomShader extends LiveShader {
         public CustomShader(String defaultVertexShaderCode, String defaultFragmentShaderCode) {
             super(defaultVertexShaderCode, defaultFragmentShaderCode, Environment.getExternalStorageDirectory() + "/fibre/", "current.vert", "current.frag");
@@ -35,7 +38,11 @@ public class MainRenderer implements GLSurfaceView.Renderer {
     private final Context context;
     private LiveShader genericShader;
     private float time;
-    private ArrayList<GShape> shapes;
+    private ArrayList<GShape> generalShapes;
+    private ArrayList<GShape> textShapes;
+
+    private TextShape textShape;
+    TextShader textShader;
 
     public MainRenderer(Context context) {
         this.context = context;
@@ -44,12 +51,16 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         String previousVertexShader = TextFiles.readStringFromAssets(context, "shaders/current.vert", "");
         String previousFragmentShader = TextFiles.readStringFromAssets(context, "shaders/current.frag", "");
         genericShader = new CustomShader(previousVertexShader, previousFragmentShader);
+
+        textShader = new TextShader();
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
         genericShader.init(context);
+        textShader.init(context);
+
         time = 0;
     }
 
@@ -58,13 +69,19 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.1f, 0.4f, 1.0f, 1.0f);
         width = w;
         height = h;
-        shapes = new ArrayList<>();
-        shapes.add(new QuadShape(2.0f));
+        generalShapes = new ArrayList<>();
+        generalShapes.add(new QuadShape(2.0f));
+
+        textShapes = new ArrayList<>();
+        textShape = new TextShape();
+        textShape.updateBuffer("ab\ncd1234");
+        textShapes.add(textShape);
 
         Log.d("MainRenderer", "width::" + width + " height::" + height);
 
         genericShader.unsubscribe();
         genericShader.subscribe(context);
+
     }
 
     @Override
@@ -75,7 +92,9 @@ public class MainRenderer implements GLSurfaceView.Renderer {
             genericShader.recompileShader(context);
         }
 
-        genericShader.draw(shapes, time, width, height);
+        genericShader.draw(generalShapes, time, width, height);
+        textShader.draw(textShapes, time, width, height);
+
         time += 0.03;
 
         long nextTick = lastTick + 20;

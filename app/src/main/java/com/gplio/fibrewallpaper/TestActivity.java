@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.gplio.andlib.files.ExternalFileObserver;
+import com.gplio.andlib.graphics.DebugText;
 import com.gplio.fibrewallpaper.main.MainRenderer;
 
 public class TestActivity extends AppCompatActivity {
@@ -42,6 +43,8 @@ public class TestActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         log("onResume");
+
+        DebugText.parseEasyFont(this);
     }
 
     @Override

@@ -43,8 +43,6 @@ public class TestActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         log("onResume");
-
-        DebugText.parseEasyFont(this);
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.gplio.andlib.graphics.TextShader;
 import com.gplio.andlib.graphics.TextShape;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -34,7 +35,6 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         }
     }
 
-    private long lastTick = System.currentTimeMillis();
     private final Context context;
     private LiveShader genericShader;
     private float time;
@@ -73,8 +73,8 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         generalShapes.add(new QuadShape(2.0f));
 
         textShapes = new ArrayList<>();
-        textShape = new TextShape();
-        textShape.updateBuffer("ab\ncd1234");
+        textShape = new TextShape(context);
+        textShape.updateBuffer(" ");
         textShapes.add(textShape);
 
         Log.d("MainRenderer", "width::" + width + " height::" + height);
@@ -86,6 +86,8 @@ public class MainRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+        long startFrame = System.currentTimeMillis();
+
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         if (genericShader.isDirty()) {
@@ -97,15 +99,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
 
         time += 0.03;
 
-        long nextTick = lastTick + 20;
-        long now;
-        while ((now = System.currentTimeMillis()) < nextTick) {
-            try {
-                Thread.sleep(nextTick - now);
-            } catch (InterruptedException ignored) {
-            }
-        }
-        lastTick = now;
+        textShape.updateBuffer(String.format(Locale.US,"frame: %d ms", (System.currentTimeMillis() - startFrame))+"\ntime:"+String.format("%.1f", time) + "\n123\n456");
     }
 
     public void unsubscribeExternalEvents() {

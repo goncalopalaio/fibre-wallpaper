@@ -62,7 +62,7 @@ float layer(vec2 uv) {
 		} 			
 	}
 
-	float t = time * 10.;
+	float t = time;
 	for(int i = 0; i < 9; i++) {
 		m += line(gv, p[4], p[i]);
 
@@ -79,7 +79,7 @@ float layer(vec2 uv) {
 }
 void main() {
 	vec2 uv = (gl_FragCoord.xy - 0.5 * vec2(width, height)) / height;
-	float t = time * 0.1;
+	float t = time * 0.3;
 	float m = 0.;
 	float gradient = uv.y;
 	uv *= 4.5;
@@ -87,12 +87,12 @@ void main() {
 	float c = cos(t);
 	mat2 rotation = mat2(c, -s, s, c);
 	uv *= rotation;
-	for (float i = 0.; i<=1.; i+=1./2.) {
+	for (float i = 0.; i<=1.; i+=8./10.) {
 		float depth = fract(i + t);
 		float size = mix(10., 0.5, depth);
 		float fade = smoothstep(0., 0.5, depth) * smoothstep(1.0, 0.8, depth);
 
-		m += layer(uv * size + i * 20.4) * fade;
+		m += layer(uv * size + i * 10.4) * fade;
 	}
 
 	vec3 baseColor = sin(t * 5.0 * vec3(0.34, 0.43, 0.63)) * 0.4 + 0.6;

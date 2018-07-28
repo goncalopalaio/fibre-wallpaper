@@ -7,6 +7,8 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.gplio.andlib.files.TextFiles;
+import com.gplio.andlib.graphics.CameraRenderer;
+import com.gplio.andlib.graphics.GMath;
 import com.gplio.andlib.graphics.GShape;
 import com.gplio.andlib.graphics.LiveShader;
 import com.gplio.andlib.graphics.QuadShape;
@@ -19,30 +21,40 @@ import java.util.Locale;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.orthoM;
+import static android.opengl.Matrix.setIdentityM;
+
 /**
  * Created by goncalopalaio on 14/07/18.
  */
 
 public class MainRenderer implements GLSurfaceView.Renderer {
 
+    private final Context context;
+    TextShader textShader;
     private int height;
     private int width;
-
-
-    private static class CustomShader extends LiveShader {
-        public CustomShader(String defaultVertexShaderCode, String defaultFragmentShaderCode) {
-            super(defaultVertexShaderCode, defaultFragmentShaderCode, Environment.getExternalStorageDirectory() + "/fibre/", "current.vert", "current.frag");
-        }
-    }
-
-    private final Context context;
     private LiveShader genericShader;
     private float time;
     private ArrayList<GShape> generalShapes;
     private ArrayList<GShape> textShapes;
 
+    private float[] viewMatrix = GMath.matrix4();
+    private float[] projectionMatrix = GMath.matrix4();
+    private float[] viewProjectionMatrix = GMath.matrix4();
+
+    private float aspectRatio = 1.0f;
+    private float left = -1f;
+    private float right = 1f;
+    private float bottom = -1f;
+    private float top = 1f;
+    private float near = -1f;
+    private float far = 100f;
+
     private TextShape textShape;
-    TextShader textShader;
+    private Camera camera = new Camera();
+
 
     public MainRenderer(Context context) {
         this.context = context;
@@ -70,7 +82,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         width = w;
         height = h;
         generalShapes = new ArrayList<>();
-        generalShapes.add(new QuadShape(2.0f));
+        generalShapes.add(new QuadShape(2.0f, 2.0f));
 
         textShapes = new ArrayList<>();
         textShape = new TextShape(context);
@@ -82,6 +94,10 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         genericShader.unsubscribe();
         genericShader.subscribe(context);
 
+        orthoM(projectionMatrix, 0, left, right, bottom, top, near, far);
+        setIdentityM(viewMatrix, 0);
+        GMath.lookAt(viewMatrix, camera.eye, camera.center, camera.up);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
     }
 
     @Override
@@ -94,15 +110,40 @@ public class MainRenderer implements GLSurfaceView.Renderer {
             genericShader.recompileShader(context);
         }
 
-        genericShader.draw(generalShapes, time, width, height);
-        textShader.draw(textShapes, time, width, height);
+        genericShader.draw(generalShapes, time, width, height, null);
+        textShader.draw(textShapes, time, width, height, viewProjectionMatrix);
 
         time += 0.03;
 
-        textShape.updateBuffer(String.format(Locale.US,"frame: %d ms", (System.currentTimeMillis() - startFrame))+"\ntime:"+String.format("%.1f", time) + "\n123\n456");
+        float cutTime = 30.0f;
+        time = time % cutTime;
+
+        textShape.updateBuffer(String.format(Locale.US,"frame: %d ms", (System.currentTimeMillis() - startFrame))+"\ntime:"+String.format("%.1f", time) + "\ncutTime: " + cutTime);
     }
 
     public void unsubscribeExternalEvents() {
         genericShader.unsubscribe();
+    }
+
+    private static class CustomShader extends LiveShader {
+        public CustomShader(String defaultVertexShaderCode, String defaultFragmentShaderCode) {
+            super(defaultVertexShaderCode,
+                    defaultFragmentShaderCode,
+                    Environment.getExternalStorageDirectory() + "/fibre/",
+                    "current.vert",
+                    "current.frag");
+        }
+    }
+
+    private class Camera {
+        public GMath.V3<Float> eye;
+        public GMath.V3<Float> center;
+        public GMath.V3<Float> up;
+
+        Camera() {
+            eye = new GMath.V3<>(0.5f, 0.5f, 1f);
+            center = new GMath.V3<>(0.5f, 0.5f, 0f);
+            up = new GMath.V3<>(0.0f, 1.0f, 0f);
+        }
     }
 }

@@ -7,7 +7,7 @@ The current visuals is built from following Martijn Steinrucken LiveCoding - The
 To make quick edits to the shader program the shader program is re-compiled when the files change in the sdcard. 
 Effectively you can edit the shader program from your computer and see it being updated in realtime (see fibre-wallpaper/shaders/build.sh)
 
-The current implementation is a draft. I cannot ensure it will work across devices. Works in a OnePlus3T but has issues in a Nexus7 tablet.
+The current implementation is a draft. I cannot ensure it will work across devices. Works in a OnePlus3T but has framerate issues in a Nexus 7 tablet.
 
 ![Screenshot](https://github.com/goncalopalaio/fibre-wallpaper/raw/master/screenshots/2018-07-20%2018_03_08.gif)
 

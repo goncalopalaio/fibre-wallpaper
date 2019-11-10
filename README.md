@@ -2,7 +2,7 @@
 
 The beginnings of an Android live wallpaper.
 
-The current visuals is built from following Martijn Steinrucken LiveCoding - The Universe Within (https://www.youtube.com/watch?v=3CycKKJiwis) guide
+The current visuals is built from following Martijn Steinrucken LiveCoding - The Universe Within (https://www.youtube.com/watch?v=3CycKKJiwis) guide using OpenGL ES2.0
 
 To make quick edits to the shader program the shader program is re-compiled when the files change in the sdcard. 
 Effectively you can edit the shader program from your computer and see it being updated in realtime (see fibre-wallpaper/shaders/build.sh)

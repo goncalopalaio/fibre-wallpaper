@@ -32,11 +32,11 @@ public class TestActivity extends AppCompatActivity {
         surface.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
 
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        // TODO GONCALO either use modern storage permissions or remove this.
+        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            throw new RuntimeException("Please grant read/write storage permission");
-        }
+            throw new RuntimeException("Please grant read/write storage permission"); // TODO GONCALO request permissions at runtime
+        }*/
     }
 
     @Override

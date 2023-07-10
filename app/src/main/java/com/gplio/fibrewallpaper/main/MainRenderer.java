@@ -32,7 +32,7 @@ import static android.opengl.Matrix.setIdentityM;
 public class MainRenderer implements GLSurfaceView.Renderer {
 
     private final Context context;
-    TextShader textShader;
+    /*TextShader textShader;*/ // TODO GONCALO either embed "/debug/easy_font_raw.png" or remove this
     private int height;
     private int width;
     private LiveShader genericShader;
@@ -52,7 +52,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
     private float near = -1f;
     private float far = 100f;
 
-    private TextShape textShape;
+    /*private TextShape textShape;*/ // TODO GONCALO either embed "/debug/easy_font_raw.png" or remove this
     private Camera camera = new Camera();
 
 
@@ -64,14 +64,14 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         String previousFragmentShader = TextFiles.readStringFromAssets(context, "shaders/current.frag", "");
         genericShader = new CustomShader(previousVertexShader, previousFragmentShader);
 
-        textShader = new TextShader();
+        /*textShader = new TextShader();*/
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
         genericShader.init(context);
-        textShader.init(context);
+        /*textShader.init(context);*/
 
         time = 0;
     }
@@ -85,9 +85,9 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         generalShapes.add(new QuadShape(2.0f, 2.0f));
 
         textShapes = new ArrayList<>();
-        textShape = new TextShape(context);
+        /*textShape = new TextShape(context);
         textShape.updateBuffer(" ");
-        textShapes.add(textShape);
+        textShapes.add(textShape);*/
 
         Log.d("MainRenderer", "width::" + width + " height::" + height);
 
@@ -111,14 +111,14 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         }
 
         genericShader.draw(generalShapes, time, width, height, null);
-        textShader.draw(textShapes, time, width, height, viewProjectionMatrix);
+        /*textShader.draw(textShapes, time, width, height, viewProjectionMatrix);*/
 
         time += 0.03;
 
         float cutTime = 30.0f;
         time = time % cutTime;
 
-        textShape.updateBuffer(String.format(Locale.US,"frame: %d ms", (System.currentTimeMillis() - startFrame))+"\ntime:"+String.format("%.1f", time) + "\ncutTime: " + cutTime);
+        /*textShape.updateBuffer(String.format(Locale.US,"frame: %d ms", (System.currentTimeMillis() - startFrame))+"\ntime:"+String.format("%.1f", time) + "\ncutTime: " + cutTime);*/
     }
 
     public void unsubscribeExternalEvents() {

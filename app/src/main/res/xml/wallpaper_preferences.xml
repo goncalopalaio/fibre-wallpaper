@@ -2,4 +2,4 @@
 <wallpaper
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/settings_description"
-    android:settingsActivity="com.gplio.fibrewallpaper.settings.WallpaperSettings"/>
+    android:settingsActivity="com.gplio.fibrewallpaper.settings.WallpaperSettingsActivity"/>

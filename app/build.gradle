@@ -36,9 +36,16 @@ android {
     }
 }
 
+// Versions
+def CORE_KTX = "1.10.1"
+def APPCOMPAT = "1.6.1"
+def CONSTRAINT_LAYOUT = "2.1.4"
+
 dependencies {
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation "androidx.appcompat:appcompat:$APPCOMPAT"
+    implementation "androidx.constraintlayout:constraintlayout:$CONSTRAINT_LAYOUT"
+    implementation "androidx.core:core-ktx:$CORE_KTX"
+
     /*debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'*/
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 }

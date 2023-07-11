@@ -1,29 +1,25 @@
 package com.gplio.fibrewallpaper.main;
 
+import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.orthoM;
+import static android.opengl.Matrix.setIdentityM;
+import static com.gplio.andlib.files.FilesKt.readStringFromAssets;
+
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.os.Environment;
 import android.util.Log;
 
-import com.gplio.andlib.files.TextFiles;
-import com.gplio.andlib.graphics.CameraRenderer;
 import com.gplio.andlib.graphics.GMath;
 import com.gplio.andlib.graphics.GShape;
 import com.gplio.andlib.graphics.LiveShader;
 import com.gplio.andlib.graphics.QuadShape;
-import com.gplio.andlib.graphics.TextShader;
-import com.gplio.andlib.graphics.TextShape;
+import com.gplio.andlib.observers.ShaderChangeObserver;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
-import static android.opengl.Matrix.multiplyMM;
-import static android.opengl.Matrix.orthoM;
-import static android.opengl.Matrix.setIdentityM;
 
 /**
  * Created by goncalopalaio on 14/07/18.
@@ -53,15 +49,15 @@ public class MainRenderer implements GLSurfaceView.Renderer {
     private float far = 100f;
 
     /*private TextShape textShape;*/ // TODO GONCALO either embed "/debug/easy_font_raw.png" or remove this
-    private Camera camera = new Camera();
+    private final Camera camera = new Camera();
 
 
     public MainRenderer(Context context) {
         this.context = context;
 
         // just leave it like this for now
-        String previousVertexShader = TextFiles.readStringFromAssets(context, "shaders/current.vert", "");
-        String previousFragmentShader = TextFiles.readStringFromAssets(context, "shaders/current.frag", "");
+        String previousVertexShader = readStringFromAssets(context, "shaders/current.vert", "");
+        String previousFragmentShader = readStringFromAssets(context, "shaders/current.frag", "");
         genericShader = new CustomShader(previousVertexShader, previousFragmentShader);
 
         /*textShader = new TextShader();*/
@@ -84,15 +80,12 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         generalShapes = new ArrayList<>();
         generalShapes.add(new QuadShape(2.0f, 2.0f));
 
-        textShapes = new ArrayList<>();
-        /*textShape = new TextShape(context);
+        /*textShapes = new ArrayList<>();
+        textShape = new TextShape(context);
         textShape.updateBuffer(" ");
         textShapes.add(textShape);*/
 
         Log.d("MainRenderer", "width::" + width + " height::" + height);
-
-        genericShader.unsubscribe();
-        genericShader.subscribe(context);
 
         orthoM(projectionMatrix, 0, left, right, bottom, top, near, far);
         setIdentityM(viewMatrix, 0);
@@ -102,7 +95,7 @@ public class MainRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl10) {
-        long startFrame = System.currentTimeMillis();
+        /*long startFrame = System.currentTimeMillis();*/
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
@@ -118,24 +111,20 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         float cutTime = 30.0f;
         time = time % cutTime;
 
-        /*textShape.updateBuffer(String.format(Locale.US,"frame: %d ms", (System.currentTimeMillis() - startFrame))+"\ntime:"+String.format("%.1f", time) + "\ncutTime: " + cutTime);*/
+        /*textShape.updateBuffer(String.format(Locale.US, "frame: %d ms", (System.currentTimeMillis() - startFrame)) + "\ntime:" + String.format("%.1f", time) + "\ncutTime: " + cutTime);*/
     }
 
-    public void unsubscribeExternalEvents() {
-        genericShader.unsubscribe();
+    public ShaderChangeObserver getShaderChangeObserver() {
+        return genericShader;
     }
 
     private static class CustomShader extends LiveShader {
         public CustomShader(String defaultVertexShaderCode, String defaultFragmentShaderCode) {
-            super(defaultVertexShaderCode,
-                    defaultFragmentShaderCode,
-                    Environment.getExternalStorageDirectory() + "/fibre/",
-                    "current.vert",
-                    "current.frag");
+            super(defaultVertexShaderCode, defaultFragmentShaderCode);
         }
     }
 
-    private class Camera {
+    private static class Camera {
         public GMath.V3<Float> eye;
         public GMath.V3<Float> center;
         public GMath.V3<Float> up;

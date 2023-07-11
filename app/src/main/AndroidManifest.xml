@@ -41,8 +41,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Wallpaper settings requires that the activity is exported or else we'll get a SecurityException: Permission Denial: starting Intent.-->
         <activity
-            android:name=".settings.WallpaperSettings"
+            android:name=".settings.WallpaperSettingsActivity"
             android:exported="true" />
     </application>
 

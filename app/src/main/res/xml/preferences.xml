@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="preference_vertex_shader_key"
+        android:summary="@string/preference_vertex_shader_summary"
+        android:title="@string/preference_vertex_shader_title"
+        />
+
+    <EditTextPreference
+        android:key="preference_fragment_shader_key"
+        android:summary="@string/preference_fragment_shader_summary"
+        android:title="@string/preference_fragment_shader_title" />
+
+</PreferenceScreen>

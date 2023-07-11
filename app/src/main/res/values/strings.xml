@@ -1,4 +1,10 @@
 <resources>
-    <string name="app_name">fibrewallpaper</string>
-    <string name="settings_description">fibrewallpaper</string>
+    <string name="app_name">Fibre Wallpaper</string>
+    <string name="settings_description">Fibre Wallpaper</string>
+    <string name="preference_vertex_shader_summary">Vertex Shader summary</string>
+    <string name="preference_vertex_shader_title">Vertex Shader</string>
+    <string name="preference_fragment_shader_summary">Fragment Shader summary</string>
+    <string name="preference_fragment_shader_title">Fragment Shader</string>
+    <string name="validation_invalid_vertex_shader">Invalid vertex shader</string>
+    <string name="validation_invalid_fragment_shader">Invalid fragment shader</string>
 </resources>

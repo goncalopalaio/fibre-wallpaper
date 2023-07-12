@@ -1,3 +1,0 @@
-[submodule "app/src/main/java/com/gplio/andlib"]
-	path = app/src/main/java/com/gplio/andlib
-	url = git@github.com:goncalopalaio/andlib.git

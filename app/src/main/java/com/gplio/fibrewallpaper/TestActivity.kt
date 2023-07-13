@@ -4,7 +4,7 @@ import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.gplio.andlib.observers.ShaderChangeObserver
+import com.gplio.fibrewallpaper.lib.observers.ShaderChangeObserver
 import com.gplio.fibrewallpaper.main.MainRenderer
 
 class TestActivity : AppCompatActivity() {

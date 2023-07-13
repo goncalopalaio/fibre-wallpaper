@@ -1,4 +1,4 @@
-package com.gplio.andlib.values
+package com.gplio.fibrewallpaper.lib.graphics
 
 enum class ShaderType {
     Vertex,

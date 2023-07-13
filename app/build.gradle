@@ -46,6 +46,4 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$CONSTRAINT_LAYOUT"
     implementation "androidx.core:core-ktx:$CORE_KTX"
 
-    /*debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'*/
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 }

@@ -1,4 +1,4 @@
-package com.gplio.andlib.files
+package com.gplio.fibrewallpaper.lib.files
 
 import android.content.Context
 import android.util.Log
@@ -9,7 +9,6 @@ private const val TAG = "Files"
 
 fun readStringFromAssets(context: Context, filename: String?, defaultText: String?): String? {
     if (filename == null) return defaultText
-
 
     try {
         val inputStream = context.assets.open(filename)

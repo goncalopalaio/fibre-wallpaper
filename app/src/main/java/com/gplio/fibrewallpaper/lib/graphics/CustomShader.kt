@@ -103,16 +103,19 @@ open class CustomShader(
                     false, 2 * 4, shape.uvsBuffer
                 )
             }
+
             if (isTexture0Enabled) {
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0])
                 GLES20.glUniform1i(uniformTextureLocation, 0)
             }
+
             if (textureOes != -1) {
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE1)
                 GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureOes)
                 GLES20.glUniform1i(uniformTextureLocation, 1)
             }
+
             GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, shape.vertexCount)
             if (isTexture0Enabled) {
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)

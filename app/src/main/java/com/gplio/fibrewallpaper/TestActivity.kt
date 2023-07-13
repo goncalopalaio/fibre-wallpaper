@@ -2,12 +2,16 @@ package com.gplio.fibrewallpaper
 
 import android.opengl.GLSurfaceView
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.gplio.fibrewallpaper.lib.logger.Tagged
+import com.gplio.fibrewallpaper.lib.logger.d
 import com.gplio.fibrewallpaper.lib.observers.ShaderChangeObserver
 import com.gplio.fibrewallpaper.main.MainRenderer
 
-class TestActivity : AppCompatActivity() {
+class TestActivity : AppCompatActivity(), Tagged {
+    override val tag: String
+        get() = "TestActivity"
+
     private var renderer: MainRenderer? = null
     private val shaderChangeObservers = mutableListOf<ShaderChangeObserver>()
 
@@ -28,21 +32,15 @@ class TestActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        log("onResume")
+        d("onResume")
 
         renderer?.shaderChangeObserver?.let { shaderChangeObservers.add(it) } // TODO implement broadcast receiver to receive shader updates
     }
 
     override fun onPause() {
         super.onPause()
-        log("onPause")
+        d("onPause")
 
         renderer?.shaderChangeObserver?.let { shaderChangeObservers.remove(it) }
-    }
-
-    companion object {
-        private fun log(msg: String) {
-            Log.d("TestActivity", msg)
-        }
     }
 }

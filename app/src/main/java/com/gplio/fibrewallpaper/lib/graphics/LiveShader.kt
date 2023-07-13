@@ -1,7 +1,7 @@
 package com.gplio.fibrewallpaper.lib.graphics
 
-import android.content.Context
-import android.util.Log
+import com.gplio.fibrewallpaper.lib.logger.Tagged
+import com.gplio.fibrewallpaper.lib.logger.d
 import com.gplio.fibrewallpaper.lib.observers.ShaderChangeObserver
 
 /**
@@ -12,28 +12,31 @@ open class LiveShader(defaultVertexShaderCode: String?, defaultFragmentShaderCod
         defaultVertexShaderCode!!,
         defaultFragmentShaderCode!!, -1
     ),
-    ShaderChangeObserver {
+    ShaderChangeObserver, Tagged {
+
+    override val tag: String
+        get() = "LiveShader"
+
     @Volatile
     var isDirty = false
         private set
 
-    fun recompileShader(context: Context?) {
+    fun recompileShader() {
         var error = init(currentVertexShaderCode, currentFragmentShaderCode)
         if (error) {
-            log("Falling back to default shader")
+            d("recompileShader", "falling back to default shader")
             currentVertexShaderCode = defaultVertexShaderCode
             currentFragmentShaderCode = defaultFragmentShaderCode
+
             error = init(defaultVertexShaderCode, defaultFragmentShaderCode)
-            if (error) {
-                log("Could not fallback to default shader")
-            }
+            if (error) d("recompileShader", "Could not fallback to default shader")
         }
         isDirty = false
     }
 
     override fun onShaderChanged(shaderType: ShaderType, content: String) {
         if (content.isEmpty()) {
-            log("Updated vertex or fragment shader was empty $shaderType $content")
+            d("recompileShader", "updated vertex or fragment shader was empty $shaderType $content")
             return
         }
         when (shaderType) {
@@ -41,12 +44,6 @@ open class LiveShader(defaultVertexShaderCode: String?, defaultFragmentShaderCod
             ShaderType.Fragment -> currentFragmentShaderCode = content
         }
         isDirty = true
-        log("Marked as dirty$shaderType $content")
-    }
-
-    companion object {
-        private fun log(msg: String) {
-            Log.d("LiveShader", msg)
-        }
+        d("recompileShader", "marked as dirty$shaderType $content")
     }
 }

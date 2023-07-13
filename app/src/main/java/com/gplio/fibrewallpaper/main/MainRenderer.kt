@@ -69,7 +69,7 @@ class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
         /*long startFrame = System.currentTimeMillis();*/
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         if (shader.isDirty) {
-            shader.recompileShader(context)
+            shader.recompileShader()
         }
         shader.draw(generalShapes, time, width, height, null)
         /*textShader.draw(textShapes, time, width, height, viewProjectionMatrix);*/time += 0.03.toFloat()

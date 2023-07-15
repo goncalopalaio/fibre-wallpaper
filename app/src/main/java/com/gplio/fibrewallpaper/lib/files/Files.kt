@@ -7,7 +7,7 @@ import java.io.InputStreamReader
 
 private const val TAG = "Files"
 
-fun readStringFromAssets(context: Context, filename: String?, defaultText: String?): String? {
+fun readStringFromAssets(context: Context, filename: String?, defaultText: String): String {
     if (filename == null) return defaultText
 
     try {

@@ -5,12 +5,6 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
-    <!--TODO GONCALO either remove this part or refactor to use the modern storage permissions -->
-    <!--
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    -->
-
     <application
         android:name="com.gplio.CustomApplication"
         android:icon="@mipmap/ic_launcher"
@@ -46,6 +40,7 @@
         <activity
             android:name=".settings.WallpaperSettingsActivity"
             android:exported="true" />
+
     </application>
 
 </manifest>

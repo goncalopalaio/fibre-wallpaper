@@ -1,19 +1,24 @@
 package com.gplio.fibrewallpaper
 
+import android.content.IntentFilter
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.gplio.fibrewallpaper.lib.logger.Tagged
 import com.gplio.fibrewallpaper.lib.logger.d
 import com.gplio.fibrewallpaper.lib.observers.ShaderChangeObserver
+import com.gplio.fibrewallpaper.main.ChangesBroadcastReceiver
 import com.gplio.fibrewallpaper.main.MainRenderer
+import com.gplio.fibrewallpaper.values.ACTION_UPDATE_SHADERS
 
-class TestActivity : AppCompatActivity(), Tagged {
+class TestActivity : AppCompatActivity(), ShaderChangeObserver, Tagged {
+
     override val tag: String
         get() = "TestActivity"
 
+    private val changesBroadcastReceiver = ChangesBroadcastReceiver()
+
     private var renderer: MainRenderer? = null
-    private val shaderChangeObservers = mutableListOf<ShaderChangeObserver>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,19 +33,36 @@ class TestActivity : AppCompatActivity(), Tagged {
         surface.setEGLConfigChooser(8, 8, 8, 8, 16, 0)
         surface.setRenderer(renderer)
         surface.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+
+        d("onCreate", "registering receiver")
+
+        IntentFilter(ACTION_UPDATE_SHADERS).also {
+            registerReceiver(changesBroadcastReceiver, it)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         d("onResume")
 
-        renderer?.shaderChangeObserver?.let { shaderChangeObservers.add(it) } // TODO implement broadcast receiver to receive shader updates
+        changesBroadcastReceiver.setListener(this)
     }
 
     override fun onPause() {
         super.onPause()
         d("onPause")
 
-        renderer?.shaderChangeObserver?.let { shaderChangeObservers.remove(it) }
+        // changesBroadcastReceiver.setListener(null)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        d("onDestroy")
+
+        //unregisterReceiver(changesBroadcastReceiver)
+    }
+
+    override fun onShadersChanged(vertexShader: String, fragmentShader: String) {
+        renderer?.requestShaderUpdate(vertexShader, fragmentShader)
     }
 }

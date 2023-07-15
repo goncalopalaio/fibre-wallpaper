@@ -3,6 +3,7 @@ package com.gplio.fibrewallpaper.lib.graphics
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import com.gplio.fibrewallpaper.lib.logger.Tagged
+import com.gplio.fibrewallpaper.lib.logger.d
 import com.gplio.fibrewallpaper.lib.logger.e
 
 open class CustomShader(
@@ -32,6 +33,8 @@ open class CustomShader(
         vertexShaderCode: String = defaultVertexShaderCode,
         fragmentShaderCode: String = defaultFragmentShaderCode
     ): Boolean {
+        d("init", "vertexShaderCode=$vertexShaderCode, fragmentShaderCode=$fragmentShaderCode")
+
         val compiledProgramResult = createGlShaderProgram(vertexShaderCode, fragmentShaderCode)
         if (compiledProgramResult.hasErrors) {
             e("init", "compiled program has errors | compiledProgramResult=$compiledProgramResult")
@@ -58,10 +61,13 @@ open class CustomShader(
         uniformViewProjectionLocation = GLES20.glGetUniformLocation(program, "vp")
 
         val glErrors = checkGlError()
-        if (glErrors.isNotEmpty()) {
+        d("init", "glErrors=$glErrors")
+
+        // TODO clear GL errors, remove uv attribute.
+        /*if (glErrors.isNotEmpty()) {
             e("init", "finished with errors | glErrors=$glErrors")
             return true
-        }
+        }*/
 
         return false
     }

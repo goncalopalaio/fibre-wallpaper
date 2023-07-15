@@ -7,4 +7,5 @@
     <string name="preference_fragment_shader_title">Fragment Shader</string>
     <string name="validation_invalid_vertex_shader">Invalid vertex shader</string>
     <string name="validation_invalid_fragment_shader">Invalid fragment shader</string>
+    <string name="reloading_shaders">Reloading shaders</string>
 </resources>

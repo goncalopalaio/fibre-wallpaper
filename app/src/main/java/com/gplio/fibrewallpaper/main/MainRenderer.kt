@@ -12,11 +12,10 @@ import com.gplio.fibrewallpaper.lib.graphics.QuadShape
 import com.gplio.fibrewallpaper.lib.graphics.Vec3
 import com.gplio.fibrewallpaper.lib.graphics.lookAt
 import com.gplio.fibrewallpaper.lib.graphics.matrix4
-import com.gplio.fibrewallpaper.lib.observers.ShaderChangeObserver
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
+class MainRenderer(context: Context) : GLSurfaceView.Renderer {
     private var height = 0
     private var width = 0
     private val shader: LiveShader
@@ -35,8 +34,6 @@ class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
     private val camera = Camera()
 
     init {
-
-        // just leave it like this for now
         val previousVertexShader = readStringFromAssets(context, "shaders/current.vert", "")
         val previousFragmentShader = readStringFromAssets(context, "shaders/current.frag", "")
         shader = LiveShader(previousVertexShader, previousFragmentShader)
@@ -72,17 +69,18 @@ class MainRenderer(private val context: Context) : GLSurfaceView.Renderer {
             shader.recompileShader()
         }
         shader.draw(generalShapes, time, width, height, null)
-        /*textShader.draw(textShapes, time, width, height, viewProjectionMatrix);*/time += 0.03.toFloat()
+        /*textShader.draw(textShapes, time, width, height, viewProjectionMatrix);*/
+        time += 0.03.toFloat()
         val cutTime = 30.0f
         time %= cutTime
 
         /*textShape.updateBuffer(String.format(Locale.US, "frame: %d ms", (System.currentTimeMillis() - startFrame)) + "\ntime:" + String.format("%.1f", time) + "\ncutTime: " + cutTime);*/
     }
 
-    val shaderChangeObserver: ShaderChangeObserver
-        get() = shader
+    fun requestShaderUpdate(vertexShader: String, fragmentShader: String) =
+        shader.requestShaderUpdate(vertexShader, fragmentShader)
 
-    private class Camera() {
+    private class Camera {
         var eye: Vec3<Float> = Vec3(0.5f, 0.5f, 1f)
         var center: Vec3<Float> = Vec3(0.5f, 0.5f, 0f)
         var up: Vec3<Float> = Vec3(0.0f, 1.0f, 0f)

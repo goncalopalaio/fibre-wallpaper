@@ -1,7 +1,10 @@
 package com.gplio.fibrewallpaper.lib.graphics
 
 import android.opengl.GLES20
+import com.gplio.fibrewallpaper.lib.logger.Logger
 import java.lang.StringBuilder
+
+private const val TAG = "ShaderUtils"
 
 data class ShaderResult(
     val hasErrors: Boolean,
@@ -10,7 +13,7 @@ data class ShaderResult(
     val shaderType: ShaderType? = null
 )
 
-fun createGlShaderProgram(vertexShaderCode: String?, fragmentShaderCode: String?): ShaderResult {
+fun createGlShaderProgram(vertexShaderCode: String, fragmentShaderCode: String): ShaderResult {
     val vertexShaderResult = compileGlShader(
         ShaderType.Vertex,
         GLES20.GL_VERTEX_SHADER,
@@ -22,8 +25,12 @@ fun createGlShaderProgram(vertexShaderCode: String?, fragmentShaderCode: String?
         fragmentShaderCode
     )
 
-    if (vertexShaderResult.hasErrors) return vertexShaderResult
-    if (fragmentShaderResult.hasErrors) return fragmentShaderResult
+    if (vertexShaderResult.hasErrors) {
+        return vertexShaderResult
+    }
+    if (fragmentShaderResult.hasErrors) {
+        return fragmentShaderResult
+    }
 
     val program = GLES20.glCreateProgram()
     GLES20.glAttachShader(program, vertexShaderResult.program)
@@ -32,9 +39,14 @@ fun createGlShaderProgram(vertexShaderCode: String?, fragmentShaderCode: String?
     GLES20.glUseProgram(program)
 
     val glErrors = checkGlError()
-    if (glErrors.isNotEmpty()) {
-        return ShaderResult(true, glErrors, -1)
-    }
+    Logger.d(TAG, "createGlShaderProgram", "glErrors=$glErrors")
+
+    // TODO clear GL errors, remove uv attribute.
+    /*
+        if (glErrors.isNotEmpty()) {
+            return ShaderResult(true, glErrors, -1)
+        }
+    */
 
     return ShaderResult(false, "", program)
 }

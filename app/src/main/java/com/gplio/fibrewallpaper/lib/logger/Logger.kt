@@ -7,7 +7,11 @@ object Logger{
         this.logger = logger
     }
 
-    fun d(tag: String, method: String, message: String) = logger?.d(tag, "$method | $message")
+    fun d(tag: String, method: String, message: String) {
+        logger?.d(tag, "$method | $message")
+    }
 
-    fun e(tag: String, method: String, message: String) = logger?.e(tag, "$method | $message")
+    fun e(tag: String, method: String, message: String) {
+        logger?.e(tag, "$method | $message")
+    }
 }

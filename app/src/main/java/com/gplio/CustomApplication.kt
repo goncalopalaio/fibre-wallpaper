@@ -1,25 +1,21 @@
 package com.gplio
 
 import android.app.Application
-import android.util.Log
+import com.gplio.fibrewallpaper.lib.logger.AndroidLogger
 import com.gplio.fibrewallpaper.lib.logger.Logger
-import com.gplio.fibrewallpaper.lib.logger.SystemLogger
+import com.gplio.fibrewallpaper.lib.logger.Tagged
+import com.gplio.fibrewallpaper.lib.logger.d
 
-private const val APPLICATION_TAG = "FBR"
+class CustomApplication : Application(), Tagged {
 
-class CustomApplication : Application() {
+    override val tag: String
+        get() = "CustomApplication"
 
     override fun onCreate() {
         super.onCreate()
 
-        Logger.setLogger(object : SystemLogger {
-            override fun d(tag: String, message: String) {
-                Log.d(tag, "$APPLICATION_TAG | $message")
-            }
+        Logger.setLogger(AndroidLogger())
 
-            override fun e(tag: String, message: String) {
-                Log.e(tag, "$APPLICATION_TAG | $message")
-            }
-        })
+        d("onCreate")
     }
 }

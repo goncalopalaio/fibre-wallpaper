@@ -19,8 +19,8 @@ Render loop appears to not be locking at a constant frame rate.
 
 ## TODO
 
-[ ] - Add support to make changes to shaders only using the device.
-[ ] - Allow the user to see the current version of the shaders in the settings screen.
-[ ] - Allow the user to change colors through the settings screen.
-[ ] - Review handling of frame updates and everything that happens in GLWallpaperService. 
+- [ ] Add support to make changes to shaders only using the device.
+- [ ] Allow the user to see the current version of the shaders in the settings screen.
+- [ ] Allow the user to change colors through the settings screen.
+- [ ] Review handling of frame updates and everything that happens in GLWallpaperService. 
 
